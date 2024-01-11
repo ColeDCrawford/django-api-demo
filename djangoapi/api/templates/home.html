@@ -1,0 +1,11 @@
+<html>
+    <body>
+        <h1>Home page</h1>
+        <div>This is an API project. Head to <a href="http://localhost:8000/api">the browsable API</a> to check it out.</div>
+        <ol>
+            {% for item in amendments %}
+                <li>{{ item.title }}: {{ item.date }}</li>
+            {% endfor %}
+        </ol>
+    </body>
+</html>
