@@ -12,10 +12,12 @@ source djangoapienv/bin/activate
 
 ## Install requirements
 `touch requirements.txt`
-----
+
+```
 django>=5.0
 djangorestframework >= 3.14.0
 requests
+```
 
 `pip install -r requirements.txt`
 
@@ -83,19 +85,33 @@ Now, add an amendment. Here's some amendment text to use: https://constitution.c
 
 We can do this from the Django shell via the command line:
 `python3 manage.py shell`
+
 `>>> from api.models import Amendment`
+
 `>>> a1 = Amendment(title="First Amendment", text="Congress shall make no law respecting an establishment of religion, or prohibiting the free exercise thereof; or abridging the freedom of speech, or of the press; or the right of the people peaceably to assemble, and to petition the Government for a redress of grievances.", date="December 15, 1971")`
+
 `>>> a1.save()`
+
 This fails because the date is not in the right format, and Django automatically validates all fields when you try to save a model. Let's fix that.
+
 `>>> a1 = Amendment(title="First Amendment", text="Congress shall make no law respecting an establishment of religion, or prohibiting the free exercise thereof; or abridging the freedom of speech, or of the press; or the right of the people peaceably to assemble, and to petition the Government for a redress of grievances.", date="1971-12-15")`
+
 `>>> a1.save()`
+
 Now we have some data! We can also create an amendment with the create method:
+
 `>>> Amendment.objects.create(title="Second Amendment", text="A well regulated Militia, being necessary to the security of a free State, the right of the people to keep and bear Arms, shall not be infringed.", date="1791-12-15")`
+
 `>>> Amendment.objects.get(id=1)`
+
 This will show the `__str__` method we defined in the model class:
+
 `<Amendment: First Amendment>`
+
 We can also easily get a list of all amendments, which Django calls a QuerySet:
+
 `>>> Amendment.objects.all()`
+
 `<QuerySet [<Amendment: First Amendment>, <Amendment: Second Amendment>]>`
 
 Let's close out the shell with Ctrl+C
@@ -126,17 +142,18 @@ You should now see the amendments on the home page!
 ## Add the API (Django REST Framework)
 ### Settings configuration
 In settings.py:
-    Add 'rest_framework' to INSTALLED_APPS
-    Add a new settings variable (see the DRF docs for more info):
-    ```python
-    REST_FRAMEWORK = {
-        # Use Django's standard `django.contrib.auth` permissions,
-        # or allow read-only access for unauthenticated users.
-        'DEFAULT_PERMISSION_CLASSES': [
-            'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-        ]
-    }
-    ```
+Add 'rest_framework' to INSTALLED_APPS
+Add a new settings variable (see the DRF docs for more info):
+
+```python
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ]
+}
+```
 
 ### Create the serializer for the Amendment model
 Make a new api/serializers.py file. This is where we define the serializer for the Amendment model. We can use a HyperlinkedModelSerializer to automatically generate the URLs for the amendments. We also need to import the Amendment model. All we need to do to serialize a model in most cases is to define the model and the fields we want to serialize; DRF will handle the rest. If you have more complex nested models, you can add `RelatedFields` to the serializer to handle those. See the [DRF docs](https://www.django-rest-framework.org/api-guide/relations/) for more info.
@@ -199,19 +216,32 @@ Now we can head to http://localhost:8000/admin/ and log in with our superuser cr
 
 ### Delete an amendment
 Back on the CLI (`python manage.py shell`), we can delete an amendment:
+
 `>>> from api.models import Amendment`
+
 `>>> a = Amendment.objects.get(id=3)`
+
 `>>> a.delete()`
 
 ## Get the amendments with requests
 `>>> import requests`
+
 `>>> r = requests.get("http://localhost:8000/api/amendments/")`
+
 `>>> r.status_code`
+
 ` 200`
+
 `>>> amendments = r.json()` # use the json() method to get the JSON data
+
 `>>> amendments`
+
 We get back a list of amendments:
+
 `[{'date': '1791-12-15', 'text': 'Congress shall make no law respecting an establishment of religion, or prohibiting the free exercise thereof; or abridging the freedom of speech, or of the press; or the right of the people peaceably to assemble, and to petition the Government for a redress of grievances.', 'title': 'First Amendment', 'id': 1}, {'date': '1791-12-15', 'text': 'A well regulated Militia, being necessary to the security of a free State, the right of the people to keep and bear Arms, shall not be infringed.', 'title': 'Second Amendment', 'id': 2}]`
+
 We can access them with standard Python methods:
+
 `>>> amendments[0]["title"]`
+
 `'First Amendment'`
